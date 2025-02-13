@@ -21,5 +21,5 @@ return [
             'per_minutes' => 1,
         ],
         'api_key' => env('GUARDIAN_API_KEY'),
-    ]
+    ],
 ];

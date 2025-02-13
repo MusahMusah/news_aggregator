@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 class RetryPolicy
 {
     private array $retryableExceptions;
+
     private int $maxAttempts;
 
     public function __construct(array $retryableExceptions = [], int $maxAttempts = 3)
@@ -32,7 +33,7 @@ class RetryPolicy
             } catch (\Exception $e) {
                 $exceptionClass = get_class($e);
 
-                if (!isset($this->retryableExceptions[$exceptionClass])) {
+                if (! isset($this->retryableExceptions[$exceptionClass])) {
                     throw $e;
                 }
 
