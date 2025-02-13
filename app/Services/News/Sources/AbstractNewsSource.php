@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\News\Sources;
 
 use App\Interfaces\NewsSourceInterface;
-use App\Services\News\CircuitBreaker;
 use App\Services\News\RetryPolicy;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -17,22 +16,18 @@ abstract class AbstractNewsSource implements NewsSourceInterface
 {
     protected string $apiKey;
     protected string $baseUrl;
-    protected CircuitBreaker $circuitBreaker;
     protected RetryPolicy $retryPolicy;
 
     public function __construct(string $apiKey)
     {
         $this->apiKey = $apiKey;
-        $this->circuitBreaker = new CircuitBreaker($this->getName());
         $this->retryPolicy = new RetryPolicy(
             retryableExceptions: [
                 ConnectionException::class => [
-                    'maxAttempts' => 5,    // More retries for connection issues
                     'delayMs' => 2000,     // Longer delay between retries
                     'exponentialBackoff' => true
                 ],
                 RequestException::class => [
-                    'maxAttempts' => 3,    // Fewer retries for request issues
                     'delayMs' => 1000,
                     'exponentialBackoff' => false
                 ]
@@ -42,20 +37,14 @@ abstract class AbstractNewsSource implements NewsSourceInterface
 
     protected function fetch(string $endpoint, array $params = []): array
     {
-        if (!$this->circuitBreaker->isAvailable()) {
-            Log::warning("Circuit breaker is open for {$this->getName()}");
-            return [];
-        }
-
         if (!$this->withinRateLimit()) {
             Log::warning("Rate limit exceeded for {$this->getName()}");
             return [];
         }
 
         try {
-            $result = $this->retryPolicy->execute(function () use ($endpoint, $params) {
-                $response = Http::timeout(5)
-                    ->get($this->baseUrl . $endpoint, $params);
+            return $this->retryPolicy->execute(function () use ($endpoint, $params) {
+                $response = Http::get($this->baseUrl . $endpoint, $params);
 
                 if (!$response->successful()) {
                     throw new RequestException($response);
@@ -63,13 +52,7 @@ abstract class AbstractNewsSource implements NewsSourceInterface
 
                 return $response->json();
             });
-
-            $this->circuitBreaker->recordSuccess();
-            return $result;
-
         } catch (\Exception $e) {
-            $this->circuitBreaker->recordFailure();
-
             Log::error("Failed to fetch from {$this->getName()}", [
                 'error' => $e->getMessage(),
                 'endpoint' => $endpoint
@@ -89,8 +72,8 @@ abstract class AbstractNewsSource implements NewsSourceInterface
             return true;
         }
 
-        $maxRequests = $rateLimitConfig['max_requests'];
-        $perMinutes = $rateLimitConfig['per_minutes'];
+        $maxRequests = $rateLimitConfig['max_requests'] ?? 10;
+        $perMinutes = $rateLimitConfig['per_minutes'] ?? 1;
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, $maxRequests)) {
             Log::warning("Rate limit exceeded for {$this->getName()}");
