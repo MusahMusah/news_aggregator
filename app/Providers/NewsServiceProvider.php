@@ -16,8 +16,8 @@ class NewsServiceProvider extends ServiceProvider
             $aggregator = new NewsAggregator();
 
             // Add news sources
-            $aggregator->addSource(new NewsApiSource(config('services.newsapi.key')));
-            $aggregator->addSource(new GuardianSource(config('services.guardian.key')));
+            $aggregator->addSource(new NewsApiSource(config('news_sources.newsapi.api_key')));
+            $aggregator->addSource(new GuardianSource(config('news_sources.guardian.api_key')));
 
             // Add observers
             $aggregator->addObserver(new CacheObserver());
