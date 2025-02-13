@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\RateLimiter;
 abstract class AbstractNewsSource implements NewsSourceInterface
 {
     protected string $apiKey;
+
     protected string $baseUrl;
+
     protected RetryPolicy $retryPolicy;
 
     public function __construct(string $apiKey)
@@ -25,28 +27,29 @@ abstract class AbstractNewsSource implements NewsSourceInterface
             retryableExceptions: [
                 ConnectionException::class => [
                     'delayMs' => 2000,     // Longer delay between retries
-                    'exponentialBackoff' => true
+                    'exponentialBackoff' => true,
                 ],
                 RequestException::class => [
                     'delayMs' => 1000,
-                    'exponentialBackoff' => false
-                ]
+                    'exponentialBackoff' => false,
+                ],
             ]
         );
     }
 
     protected function fetch(string $endpoint, array $params = []): array
     {
-        if (!$this->withinRateLimit()) {
+        if (! $this->withinRateLimit()) {
             Log::warning("Rate limit exceeded for {$this->getName()}");
+
             return [];
         }
 
         try {
             return $this->retryPolicy->execute(function () use ($endpoint, $params) {
-                $response = Http::get($this->baseUrl . $endpoint, $params);
+                $response = Http::get($this->baseUrl.$endpoint, $params);
 
-                if (!$response->successful()) {
+                if (! $response->successful()) {
                     throw new RequestException($response);
                 }
 
@@ -55,7 +58,7 @@ abstract class AbstractNewsSource implements NewsSourceInterface
         } catch (\Exception $e) {
             Log::error("Failed to fetch from {$this->getName()}", [
                 'error' => $e->getMessage(),
-                'endpoint' => $endpoint
+                'endpoint' => $endpoint,
             ]);
 
             return [];
@@ -77,10 +80,12 @@ abstract class AbstractNewsSource implements NewsSourceInterface
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, $maxRequests)) {
             Log::warning("Rate limit exceeded for {$this->getName()}");
+
             return false;
         }
 
         RateLimiter::hit($rateLimitKey, $perMinutes * 60);
+
         return true;
     }
 

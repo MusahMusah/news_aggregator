@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\News;
 
+use App\DataTransferObjects\ArticleData;
 use App\Interfaces\NewsSourceInterface;
 use App\Models\Article;
 use App\Services\News\Observers\NewsObserverInterface;
@@ -12,6 +13,7 @@ use Illuminate\Support\Collection;
 class NewsAggregator
 {
     private Collection $sources;
+
     private Collection $observers;
 
     public function __construct()
@@ -32,20 +34,19 @@ class NewsAggregator
 
     public function fetchNews(): void
     {
-        $articles = $this->sources->map(function (NewsSourceInterface $source) {
-            return collect($source->fetchArticles())->map(function ($article) use ($source) {
-                return $this->saveArticle($article);
-            });
-        })->flatten();
+        $articles = $this->sources
+            ->map(fn (NewsSourceInterface $source) => $source->fetchArticles()
+                ->map(fn (ArticleData $article) => $this->saveArticle($article)))
+            ->flatten();
 
         $this->notifyObservers($articles);
     }
 
-    private function saveArticle(array $articleData): Article
+    private function saveArticle(ArticleData $articleData): Article
     {
         return Article::query()->updateOrCreate(
-            ['url' => $articleData['url']],
-            $articleData
+            ['url' => $articleData->url],
+            $articleData->toArray()
         );
     }
 

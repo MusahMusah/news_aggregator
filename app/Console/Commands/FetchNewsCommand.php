@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Services\News\NewsAggregator;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class FetchNewsCommand extends Command
 {

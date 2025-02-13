@@ -4,32 +4,33 @@ declare(strict_types=1);
 
 namespace App\Services\News\Sources;
 
-use App\Services\News\Sources\AbstractNewsSource;
+use App\DataTransferObjects\ArticleData;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 
 class NewsApiSource extends AbstractNewsSource
 {
     protected string $baseUrl = 'https://newsapi.org/v2/';
 
-    public function fetchArticles(): array
+    public function fetchArticles(): Collection
     {
         $data = $this->fetch('top-headlines', [
             'apiKey' => $this->apiKey,
-            'language' => 'en'
+            'language' => 'en',
         ]);
 
-        return array_map(function ($article) {
-            return [
+        return collect($data['articles'] ?? [])->map(function ($article) {
+            return ArticleData::from([
                 'title' => $article['title'],
                 'description' => $article['description'],
-                'content' => $article['content'],
-                'author' => $article['author'],
-                'source' => 'NewsAPI - ' . $article['source']['name'],
-                'category' => 'general',
-                'published_at' => Carbon::parse($article['publishedAt']),
+                'content' => $article['content'] ?? null,
+                'author' => $article['author'] ?? null,
+                'source' => 'NewsAPI - '.$article['source']['name'],
                 'url' => $article['url'],
-                'image_url' => $article['urlToImage']
-            ];
-        }, $data['articles'] ?? []);
+                'image' => $article['urlToImage'],
+                'published_at' => CarbonImmutable::parse($article['publishedAt']),
+            ]);
+        });
     }
 
     public function getName(): string
