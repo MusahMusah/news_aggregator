@@ -11,7 +11,7 @@ class CacheObserver implements NewsObserverInterface
 {
     public function onNewsUpdated(Collection $articles): void
     {
-        Cache::tags(['news'])->flush();
-        Cache::tags(['news'])->put('latest_articles', $articles->take(10), now()->addHour());
+        Cache::forget('latest_articles');
+        Cache::put('latest_articles', $articles->take(10), now()->addHour());
     }
 }
