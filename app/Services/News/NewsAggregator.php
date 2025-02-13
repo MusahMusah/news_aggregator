@@ -65,17 +65,6 @@ class NewsAggregator
         }
     }
 
-//    public function fetchNews(): void
-//    {
-//        $articles = $this->sources->map(function (NewsSourceInterface $source) {
-//            return collect($source->fetchArticles())->map(function ($article) use ($source) {
-//                return $this->saveArticle($article);
-//            });
-//        })->flatten();
-//
-//        $this->notifyObservers($articles);
-//    }
-
     private function saveArticle(array $articleData): Article
     {
         return Article::query()->updateOrCreate(
