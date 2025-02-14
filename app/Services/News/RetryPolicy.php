@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\News;
 
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Log;
 
-class RetryPolicy
+final class RetryPolicy
 {
     private array $retryableExceptions;
 
@@ -21,7 +22,7 @@ class RetryPolicy
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(callable $operation): mixed
     {
@@ -30,10 +31,10 @@ class RetryPolicy
         while (true) {
             try {
                 return $operation();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $exceptionClass = get_class($e);
 
-                if (! isset($this->retryableExceptions[$exceptionClass])) {
+                if ( ! isset($this->retryableExceptions[$exceptionClass])) {
                     throw $e;
                 }
 
@@ -59,7 +60,7 @@ class RetryPolicy
         return $config['delayMs'];
     }
 
-    private function logException(\Exception $e, int $attempt): void
+    private function logException(Exception $e, int $attempt): void
     {
         $exceptionClass = get_class($e);
         $message = "Attempt {$attempt} failed with exception [{$exceptionClass}]: {$e->getMessage()}";

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
      * The package will use this format when working with dates. If this option
@@ -36,8 +38,8 @@ return [
      * types.
      */
     'transformers' => [
-        DateTimeInterface::class => \Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer::class,
-        \Illuminate\Contracts\Support\Arrayable::class => \Spatie\LaravelData\Transformers\ArrayableTransformer::class,
+        DateTimeInterface::class => Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer::class,
+        Illuminate\Contracts\Support\Arrayable::class => Spatie\LaravelData\Transformers\ArrayableTransformer::class,
         BackedEnum::class => Spatie\LaravelData\Transformers\EnumTransformer::class,
     ],
 
@@ -124,7 +126,7 @@ return [
      * method. By default, only when a request is passed the data is being validated. This
      * behaviour can be changed to always validate or to completely disable validation.
      */
-    'validation_strategy' => \Spatie\LaravelData\Support\Creation\ValidationStrategy::OnlyRequests->value,
+    'validation_strategy' => Spatie\LaravelData\Support\Creation\ValidationStrategy::OnlyRequests->value,
 
     /*
      * A data object can map the names of its properties when transforming (output) or when

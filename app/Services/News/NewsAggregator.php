@@ -10,7 +10,7 @@ use App\Models\Article;
 use App\Services\News\Observers\NewsObserverInterface;
 use Illuminate\Support\Collection;
 
-class NewsAggregator
+final class NewsAggregator
 {
     private Collection $sources;
 
@@ -52,7 +52,7 @@ class NewsAggregator
 
     private function notifyObservers(Collection $articles): void
     {
-        $this->observers->each(function ($observer) use ($articles) {
+        $this->observers->each(function ($observer) use ($articles): void {
             $observer->onNewsUpdated($articles);
         });
     }

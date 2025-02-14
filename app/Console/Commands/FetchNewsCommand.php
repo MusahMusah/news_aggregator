@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Services\News\NewsAggregator;
 use Illuminate\Console\Command;
 
-class FetchNewsCommand extends Command
+final class FetchNewsCommand extends Command
 {
     /**
      * The name and signature of the console command.

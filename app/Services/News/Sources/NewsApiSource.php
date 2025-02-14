@@ -8,7 +8,7 @@ use App\DataTransferObjects\ArticleData;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
-class NewsApiSource extends AbstractNewsSource
+final class NewsApiSource extends AbstractNewsSource
 {
     protected string $baseUrl = 'https://newsapi.org/v2/';
 
@@ -19,18 +19,16 @@ class NewsApiSource extends AbstractNewsSource
             'language' => 'en',
         ]);
 
-        return collect($data['articles'] ?? [])->map(function ($article) {
-            return ArticleData::from([
-                'title' => $article['title'],
-                'description' => $article['description'],
-                'content' => $article['content'] ?? null,
-                'author' => $article['author'] ?? null,
-                'source' => 'NewsAPI - '.$article['source']['name'],
-                'url' => $article['url'],
-                'image' => $article['urlToImage'],
-                'published_at' => CarbonImmutable::parse($article['publishedAt']),
-            ]);
-        });
+        return collect($data['articles'] ?? [])->map(fn ($article) => ArticleData::from([
+            'title' => $article['title'],
+            'description' => $article['description'],
+            'content' => $article['content'] ?? null,
+            'author' => $article['author'] ?? null,
+            'source' => 'NewsAPI - ' . $article['source']['name'],
+            'url' => $article['url'],
+            'image' => $article['urlToImage'],
+            'published_at' => CarbonImmutable::parse($article['publishedAt']),
+        ]));
     }
 
     public function getName(): string

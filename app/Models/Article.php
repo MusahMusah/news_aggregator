@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\DataTransferObjects\ArticleData;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\LaravelData\WithData;
 
-class Article extends Model
+final class Article extends Model
 {
+    use WithData;
+
     protected string $dataClass = ArticleData::class;
 
     protected $fillable = [

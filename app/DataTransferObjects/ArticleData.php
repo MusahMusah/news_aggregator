@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataTransferObjects;
 
 use Carbon\CarbonImmutable;
@@ -17,5 +19,6 @@ final class ArticleData extends Data
         readonly public string $url,
         readonly public ?string $image,
         readonly public CarbonImmutable $published_at
-    ) {}
+    ) {
+    }
 }

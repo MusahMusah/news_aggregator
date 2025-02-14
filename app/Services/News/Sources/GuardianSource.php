@@ -8,7 +8,7 @@ use App\DataTransferObjects\ArticleData;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
-class GuardianSource extends AbstractNewsSource
+final class GuardianSource extends AbstractNewsSource
 {
     protected string $baseUrl = 'https://content.guardianapis.com/';
 
@@ -19,19 +19,17 @@ class GuardianSource extends AbstractNewsSource
             'show-fields' => 'all',
         ]);
 
-        return collect($data['response']['results'] ?? [])->map(function ($article) {
-            return ArticleData::from([
-                'title' => $article['webTitle'],
-                'description' => $article['fields']['trailText'] ?? null,
-                'content' => $article['fields']['bodyText'] ?? null,
-                'author' => $article['fields']['byline'] ?? null,
-                'category' => $article['sectionName'] ?? null,
-                'source' => 'The Guardian - ' . $article['fields']['publication'] ?? '',
-                'url' => $article['webUrl'],
-                'image' => optional($article['fields'])['thumbnail'],
-                'published_at' => CarbonImmutable::parse($article['webPublicationDate']),
-            ]);
-        });
+        return collect($data['response']['results'] ?? [])->map(fn ($article) => ArticleData::from([
+            'title' => $article['webTitle'],
+            'description' => $article['fields']['trailText'] ?? null,
+            'content' => $article['fields']['bodyText'] ?? null,
+            'author' => $article['fields']['byline'] ?? null,
+            'category' => $article['sectionName'] ?? null,
+            'source' => 'The Guardian - ' . $article['fields']['publication'] ?? '',
+            'url' => $article['webUrl'],
+            'image' => optional($article['fields'])['thumbnail'],
+            'published_at' => CarbonImmutable::parse($article['webPublicationDate']),
+        ]));
     }
 
     public function getName(): string

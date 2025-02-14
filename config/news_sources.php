@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'new_york_times' => [
         'rate_limit' => [

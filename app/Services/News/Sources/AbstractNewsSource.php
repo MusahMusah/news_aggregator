@@ -6,6 +6,7 @@ namespace App\Services\News\Sources;
 
 use App\Interfaces\NewsSourceInterface;
 use App\Services\News\RetryPolicy;
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -37,9 +38,11 @@ abstract class AbstractNewsSource implements NewsSourceInterface
         );
     }
 
+    abstract public function getName(): string;
+
     protected function fetch(string $endpoint, array $params = []): array
     {
-        if (! $this->withinRateLimit()) {
+        if ( ! $this->withinRateLimit()) {
             Log::warning("Rate limit exceeded for {$this->getName()}");
 
             return [];
@@ -47,15 +50,15 @@ abstract class AbstractNewsSource implements NewsSourceInterface
 
         try {
             return $this->retryPolicy->execute(function () use ($endpoint, $params) {
-                $response = Http::get($this->baseUrl.$endpoint, $params);
+                $response = Http::get($this->baseUrl . $endpoint, $params);
 
-                if (! $response->successful()) {
+                if ( ! $response->successful()) {
                     throw new RequestException($response);
                 }
 
                 return $response->json();
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Failed to fetch from {$this->getName()}", [
                 'error' => $e->getMessage(),
                 'endpoint' => $endpoint,
@@ -70,7 +73,7 @@ abstract class AbstractNewsSource implements NewsSourceInterface
         $rateLimitKey = $this->getRateLimitKey();
         $rateLimitConfig = config("news_sources.{$this->getName()}.rate_limit");
 
-        if (is_null($rateLimitConfig)) {
+        if (null === $rateLimitConfig) {
             // If no rate limit config is found, allow the request
             return true;
         }
@@ -93,6 +96,4 @@ abstract class AbstractNewsSource implements NewsSourceInterface
     {
         return "rate_limit:{$this->getName()}";
     }
-
-    abstract public function getName(): string;
 }

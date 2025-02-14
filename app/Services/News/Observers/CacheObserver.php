@@ -7,7 +7,7 @@ namespace App\Services\News\Observers;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
-class CacheObserver implements NewsObserverInterface
+final class CacheObserver implements NewsObserverInterface
 {
     public function onNewsUpdated(Collection $articles): void
     {
