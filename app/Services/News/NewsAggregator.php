@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\DB;
 
 final class NewsAggregator
 {
-    private Collection $sources;
+    public Collection $sources;
 
-    private Collection $observers;
+    public Collection $observers;
 
     public function __construct()
     {
@@ -24,14 +24,18 @@ final class NewsAggregator
         $this->observers = collect();
     }
 
-    public function addSource(NewsSourceInterface $source): void
+    public function addSource(NewsSourceInterface $source): self
     {
         $this->sources->push($source);
+
+        return $this;
     }
 
-    public function addObserver(NewsObserverInterface $observer): void
+    public function addObserver(NewsObserverInterface $observer): self
     {
         $this->observers->push($observer);
+
+        return $this;
     }
 
     public function fetchNews(): void

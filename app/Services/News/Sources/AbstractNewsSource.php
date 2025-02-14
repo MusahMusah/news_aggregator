@@ -74,7 +74,6 @@ abstract class AbstractNewsSource implements NewsSourceInterface
         $rateLimitConfig = config("news_sources.{$this->getName()}.rate_limit");
 
         if (null === $rateLimitConfig) {
-            // If no rate limit config is found, allow the request
             return true;
         }
 

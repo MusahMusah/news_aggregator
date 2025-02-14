@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\DataTransferObjects\ArticleData;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\LaravelData\WithData;
 
 final class Article extends Model
 {
+    use HasFactory;
     use WithData;
 
     protected string $dataClass = ArticleData::class;
