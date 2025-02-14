@@ -10,6 +10,7 @@ use Spatie\LaravelData\Data;
 final class ArticleData extends Data
 {
     public function __construct(
+        readonly public ?int $id,
         readonly public ?string $author,
         readonly public string $title,
         readonly public ?string $content,
