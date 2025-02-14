@@ -1,66 +1,174 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# News Aggregator
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The News Aggregator is a Laravel 11 application designed to collect, process, and store news articles from various sources. It employs design patterns and SOLID principles to ensure maintainability and scalability. The system utilizes a retry policy for fault tolerance and incorporates Data Transfer Objects (DTOs) to centralize data payloads.
 
-## About Laravel
+## Prerequisites
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Ensure you have the following installed before proceeding:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [PHP](https://www.php.net/) (version 8.2 or later recommended)
+- [Composer](https://getcomposer.org/)
+- [Nginx](https://www.nginx.com/) or [Apache](https://httpd.apache.org/) (for serving the application)
+- [Docker](https://www.docker.com/) (optional for containerized development)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Installation
 
-## Learning Laravel
+Clone the repository and install dependencies:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+cd news-aggregator
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+# Install PHP dependencies
+composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Environment Configuration
 
-## Laravel Sponsors
+Copy the example environment file and set up the required configurations:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+cp .env.example .env
+```
 
-### Premium Partners
+Generate the application key:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```bash
+php artisan key:generate
+```
 
-## Contributing
+## Running the Application
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Start the development server:
 
-## Code of Conduct
+```bash
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Alternatively, if using Docker:
 
-## Security Vulnerabilities
+```bash
+./vendor/bin/sail up
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+The application should now be accessible at [http://localhost:8000](http://localhost:8000).
 
-## License
+## Running Tests
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Run the test suite:
+
+```bash
+php artisan test
+```
+
+## Deployment
+
+### Deploying to Production
+
+For production deployment, set up your web server:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+php artisan schedule:work
+```
+
+---
+
+## News Aggregator Architecture and Design Patterns
+
+### Architecture
+
+The News Aggregator follows a modular architecture:
+
+1. **News Aggregator Service**: Manages news sources and observers, orchestrating the fetching and processing of news articles.
+
+2. **News Sources**: Implement the `NewsSourceInterface` to fetch articles from various providers.
+
+3. **Observers**: Implement the `NewsObserverInterface` to handle events when news articles are updated.
+
+4. **Data Transfer Objects (DTOs)**: Encapsulate article data, ensuring a consistent structure across the application.
+
+### Design Patterns and SOLID Principles
+
+- **Strategy Pattern**: The `RetryPolicy` class allows for different retry strategies, promoting flexibility and adherence to the Open/Closed Principle.
+
+- **Observer Pattern**: Observers listen for updates from the News Aggregator, enabling a decoupled design and adherence to the Dependency Inversion Principle.
+
+- **Factory Pattern**: The `NewsAggregator` class can instantiate various news sources, promoting the Open/Closed Principle.
+
+- **Data Transfer Object (DTO) Pattern**: The `ArticleData` class encapsulates article data, ensuring a consistent structure and promoting the Single Responsibility Principle.
+
+### Retry Policy Implementation
+
+The `RetryPolicy` class implements a retry mechanism for fault tolerance. It allows for different retry strategies, which can be swapped between test and production environments. This approach adheres to the Open/Closed Principle, as the retry policy can be extended without modifying existing code.
+
+### Data Transfer Objects (DTOs)
+
+The `ArticleData` class is a Data Transfer Object that encapsulates article data. It ensures a consistent structure across the application and promotes the Single Responsibility Principle by handling data representation separately from business logic.
+
+## Task Scheduling for Hourly News Fetch
+
+To ensure that news articles are fetched every hour, the application utilizes Laravel's task scheduling feature. This approach allows for the definition of scheduled tasks within the application itself, eliminating the need for manual cron entries. citeturn0search0
+
+### Scheduling the News Fetch Command
+
+In the `app/Console/Kernel.php` file, the `schedule` method is used to define the frequency of the `news:fetch` command. To execute the command every hour, add the following line:
+
+```php
+$schedule->command('news:fetch')->hourly();
+```
+
+This configuration ensures that the `news:fetch` command runs at the start of every hour. citeturn0search0
+
+### Setting Up the Scheduler
+
+For the scheduler to run, a cron entry is required on the server. Add the following line to your server's crontab:
+
+```bash
+* * * * * php /path-to-your-project/artisan schedule:run >> /dev/null 2>&1
+```
+
+This cron job runs every minute, allowing Laravel to evaluate and execute any scheduled tasks that are due. citeturn0search0
+
+## Dependency Injection in NewsServiceProvider
+
+The `NewsServiceProvider` class is responsible for binding the `NewsAggregator` service into the application's service container. This approach utilizes dependency injection to manage class dependencies, promoting loose coupling and enhancing testability.
+
+### Registering the NewsAggregator Singleton
+
+Within the `register` method of the `NewsServiceProvider`, the `NewsAggregator` is registered as a singleton:
+
+```php
+$this->app->singleton(NewsAggregator::class, function () {
+    $aggregator = new NewsAggregator();
+
+    $aggregator->addSource(new NewsApiSource(config('news_sources.newsapi.api_key')));
+    if (!app()->environment('testing')) {
+        $aggregator->addSource(new GuardianSource(config('news_sources.guardian.api_key')));
+        $aggregator->addSource(new NewYorkTimesSource(config('news_sources.new_york_times.api_key')));
+    }
+
+    // Add observers
+    $aggregator->addObserver(new CacheObserver());
+
+    return $aggregator;
+});
+```
+
+This configuration ensures that the same instance of `NewsAggregator` is used throughout the application, adhering to the Singleton design pattern.
+
+### Adding News Sources and Observers
+
+The `NewsAggregator` is configured with various news sources and observers:
+
+- **News Sources**: Instances of `NewsApiSource`, `GuardianSource`, and `NewYorkTimesSource` are added to the aggregator. The `GuardianSource` and `NewYorkTimesSource` are conditionally added based on the application's environment, ensuring they are not included during testing.
+
+- **Observers**: An instance of `CacheObserver` is added to the aggregator to handle caching concerns.
+
+This setup demonstrates the use of dependency injection to manage class dependencies, promoting a clean and maintainable codebase.
+
+## Author
+
+Developed by [MusahMusah](https://github.com/musahmusah). 
