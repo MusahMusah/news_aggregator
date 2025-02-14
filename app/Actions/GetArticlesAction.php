@@ -28,7 +28,7 @@ final class GetArticlesAction
                     AllowedFilter::exact('published_at'),
                 ])
                 ->allowedIncludes('authors')
-                ->allowedSorts(['title', 'author', 'source', 'published_at']);
+                ->allowedSorts(['title', 'authors.name', 'source', 'published_at']);
 
             $paginator = match (Request::has('cursor')) {
                 true => $query->cursorPaginate(),

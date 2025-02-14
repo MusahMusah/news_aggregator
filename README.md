@@ -90,16 +90,6 @@ The News Aggregator follows a modular architecture:
 
 4. **Data Transfer Objects (DTOs)**: Encapsulate article data, ensuring a consistent structure across the application.
 
-### Design Patterns and SOLID Principles
-
-- **Strategy Pattern**: The `RetryPolicy` class allows for different retry strategies, promoting flexibility and adherence to the Open/Closed Principle.
-
-- **Observer Pattern**: Observers listen for updates from the News Aggregator, enabling a decoupled design and adherence to the Dependency Inversion Principle.
-
-- **Factory Pattern**: The `NewsAggregator` class can instantiate various news sources, promoting the Open/Closed Principle.
-
-- **Data Transfer Object (DTO) Pattern**: The `ArticleData` class encapsulates article data, ensuring a consistent structure and promoting the Single Responsibility Principle.
-
 ### Retry Policy Implementation
 
 The `RetryPolicy` class implements a retry mechanism for fault tolerance. It allows for different retry strategies, which can be swapped between test and production environments. This approach adheres to the Open/Closed Principle, as the retry policy can be extended without modifying existing code.
@@ -110,27 +100,17 @@ The `ArticleData` class is a Data Transfer Object that encapsulates article data
 
 ## Task Scheduling for Hourly News Fetch
 
-To ensure that news articles are fetched every hour, the application utilizes Laravel's task scheduling feature. This approach allows for the definition of scheduled tasks within the application itself, eliminating the need for manual cron entries. citeturn0search0
+To ensure that news articles are fetched every hour, the application utilizes Laravel's task scheduling feature. This approach allows for the definition of scheduled tasks within the application itself, eliminating the need for manual cron entries.
 
 ### Scheduling the News Fetch Command
 
-In the `app/Console/Kernel.php` file, the `schedule` method is used to define the frequency of the `news:fetch` command. To execute the command every hour, add the following line:
+In the `routes/console.php` file, the `schedule` command is used to define the frequency of the `news:fetch` command. To execute the command every hour, add the following line:
 
 ```php
-$schedule->command('news:fetch')->hourly();
+Schedule::command('news:fetch')->hourly();
 ```
 
-This configuration ensures that the `news:fetch` command runs at the start of every hour. citeturn0search0
-
-### Setting Up the Scheduler
-
-For the scheduler to run, a cron entry is required on the server. Add the following line to your server's crontab:
-
-```bash
-* * * * * php /path-to-your-project/artisan schedule:run >> /dev/null 2>&1
-```
-
-This cron job runs every minute, allowing Laravel to evaluate and execute any scheduled tasks that are due. citeturn0search0
+This configuration ensures that the `news:fetch` command runs at the start of every hour.
 
 ## Dependency Injection in NewsServiceProvider
 
@@ -169,6 +149,91 @@ The `NewsAggregator` is configured with various news sources and observers:
 
 This setup demonstrates the use of dependency injection to manage class dependencies, promoting a clean and maintainable codebase.
 
+
+## API Endpoints for Articles
+
+The application provides the following API endpoints for retrieving articles:
+
+- **Get All Articles**: `GET /api/articles`
+    - **Description**: Retrieves a list of articles with support for filtering, sorting, and pagination.
+    - **Query Parameters**:
+        - `filter[title]`: Filter articles by title.
+        - `filter[source]`: Filter articles by source.
+        - `filter[authors.name]`: Filter articles by author's name.
+        - `filter[published_at]`: Filter articles by publication date.
+        - `sort=title | sort=-title`: Sort articles by specified attributes (e.g., `title`, `author`, `source`, `published_at`) using - (desc) or + (asc)
+        - `page=number`: Specify the page number for pagination.
+        - `per_page=number`: Specify the number of articles per page.
+
+  **Example Request**:
+
+  ```http
+  GET /api/articles?filter[title]=technology&sort=published_at&page[number]=1
+  ```
+
+  **Response**:
+
+  ```json
+  {
+    "success": true,
+    "message": "Articles retrieved successfully.",
+     "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 3,
+                "title": "Attorney General Pam Bondi rails against New York leaders as she announces immigration lawsuit - The Associated Press",
+                "author": null,
+                "content": "WASHINGTON (AP) President Donald Trumps newly installed attorney general, Pam Bondi, went after New York leaders Wednesday over the states immigration policies, announcing a lawsuit in the latest eff… [+4611 chars]",
+                "category": null,
+                "description": "President Donald Trump’s newly installed attorney general, Pam Bondi, is going after New York leaders over the state’s immigration policies. She announced a lawsuit against them in the latest effort by the Republican administration to carry out the president’…",
+                "source": "NewsAPI - Associated Press",
+                "url": "https://apnews.com/article/justice-department-immigration-pam-bondi-trump-4829db2b93afcfa35194014f160d7edb",
+                "image": "https://dims.apnews.com/dims4/default/d0b7601/2147483647/strip/true/crop/6728x3785+0+355/resize/1440x810!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F72%2Fd8%2F603dd0f838449620586eb630ac86%2Fa5ca3ed54fa34ecba61c2c812c947e3a",
+                "published_at": "2025-02-13T03:22:00+00:00",
+                "authors": [
+                    {
+                        "id": 2,
+                        "name": "ALANNA DURKIN RICHER"
+                    },
+                    {
+                        "id": 3,
+                        "name": "ANTHONY IZAGUIRRE"
+                    }
+                ]
+            }
+        ],
+        "first_page_url": "http://news_aggregator.test/api/articles?include=authors&filter%5Bauthors.name%5D=Anthony&page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://news_aggregator.test/api/articles?include=authors&filter%5Bauthors.name%5D=Anthony&page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://news_aggregator.test/api/articles?include=authors&filter%5Bauthors.name%5D=Anthony&page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://news_aggregator.test/api/articles",
+        "per_page": 15,
+        "prev_page_url": null,
+        "to": 1,
+        "total": 1
+    }
+  }
+  ```
+
 ## Author
 
-Developed by [MusahMusah](https://github.com/musahmusah). 
+Developed by [MusahMusah](https://github.com/musahmusah).
