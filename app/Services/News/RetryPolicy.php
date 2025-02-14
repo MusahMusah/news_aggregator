@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\News;
 
+use App\Interfaces\RetryPolicyInterface;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Log;
 
-final class RetryPolicy
+final class RetryPolicy implements RetryPolicyInterface
 {
     private array $retryableExceptions;
 

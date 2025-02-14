@@ -40,6 +40,11 @@ abstract class AbstractNewsSource implements NewsSourceInterface
 
     abstract public function getName(): string;
 
+    public function getRateLimitKey(): string
+    {
+        return "rate_limit:{$this->getName()}";
+    }
+
     protected function fetch(string $endpoint, array $params = []): array
     {
         if ( ! $this->withinRateLimit()) {
@@ -89,10 +94,5 @@ abstract class AbstractNewsSource implements NewsSourceInterface
         RateLimiter::hit($rateLimitKey, $perMinutes * 60);
 
         return true;
-    }
-
-    protected function getRateLimitKey(): string
-    {
-        return "rate_limit:{$this->getName()}";
     }
 }
