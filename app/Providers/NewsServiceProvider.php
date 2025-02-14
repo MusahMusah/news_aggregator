@@ -6,6 +6,7 @@ use App\Services\News\NewsAggregator;
 use App\Services\News\Observers\CacheObserver;
 use App\Services\News\Sources\GuardianSource;
 use App\Services\News\Sources\NewsApiSource;
+use App\Services\News\Sources\NewYorkTimesSource;
 use Illuminate\Support\ServiceProvider;
 
 class NewsServiceProvider extends ServiceProvider
@@ -18,6 +19,7 @@ class NewsServiceProvider extends ServiceProvider
             // Add news sources
             $aggregator->addSource(new NewsApiSource(config('news_sources.newsapi.api_key')));
             $aggregator->addSource(new GuardianSource(config('news_sources.guardian.api_key')));
+            $aggregator->addSource(new NewYorkTimesSource(config('news_sources.new_york_times.api_key')));
 
             // Add observers
             $aggregator->addObserver(new CacheObserver);

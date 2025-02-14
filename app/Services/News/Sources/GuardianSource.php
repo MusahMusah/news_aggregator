@@ -28,7 +28,7 @@ class GuardianSource extends AbstractNewsSource
                 'category' => $article['sectionName'] ?? null,
                 'source' => 'The Guardian - ' . $article['fields']['publication'] ?? '',
                 'url' => $article['webUrl'],
-                'image' => $article['fields']['thumbnail'],
+                'image' => optional($article['fields'])['thumbnail'],
                 'published_at' => CarbonImmutable::parse($article['webPublicationDate']),
             ]);
         });
