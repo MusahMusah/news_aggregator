@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withSchedule(function (Schedule $schedule): void {
-        $schedule->command('news:fetch')->hourly();
+        // $schedule->command('news:fetch')->hourly();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 
