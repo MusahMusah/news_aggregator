@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 final class GetArticlesAction
@@ -23,8 +24,13 @@ final class GetArticlesAction
 
         return Cache::flexible($cacheKey, [$freshFor, $staleFor], function () {
             $query = QueryBuilder::for(Article::class)
-                ->allowedFilters(['title', 'source', 'author'])
-                ->allowedSorts(['title']);
+                ->allowedFilters([
+                    AllowedFilter::partial('title'),
+                    AllowedFilter::exact('source'),
+                    AllowedFilter::partial('author'),
+                    AllowedFilter::exact('published_at'),
+                ])
+                ->allowedSorts(['title', 'author', 'source', 'published_at']);
 
             $paginator = match (Request::has('cursor')) {
                 true => $query->cursorPaginate(),
