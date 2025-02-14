@@ -7,8 +7,10 @@ namespace App\Services\News;
 use App\DataTransferObjects\ArticleData;
 use App\Interfaces\NewsSourceInterface;
 use App\Models\Article;
+use App\Models\Author;
 use App\Services\News\Observers\NewsObserverInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 final class NewsAggregator
 {
@@ -44,10 +46,22 @@ final class NewsAggregator
 
     private function saveArticle(ArticleData $articleData): Article
     {
-        return Article::query()->updateOrCreate(
-            ['url' => $articleData->url],
-            $articleData->toArray()
-        );
+        return DB::transaction(function () use ($articleData) {
+            $article = Article::query()->updateOrCreate(
+                ['url' => $articleData->url],
+                $articleData->except('author')->toArray()
+            );
+
+            if ( ! empty($articleData->author)) {
+                $authorNames = array_map('trim', explode(',', $articleData->author));
+
+                $authors = collect($authorNames)->map(fn ($name) => Author::query()->firstOrCreate(['name' => $name]));
+
+                $article->authors()->sync($authors->pluck('id')->toArray());
+            }
+
+            return $article->load('authors');
+        });
     }
 
     private function notifyObservers(Collection $articles): void

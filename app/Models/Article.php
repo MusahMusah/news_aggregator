@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\DataTransferObjects\ArticleData;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\LaravelData\WithData;
 
 final class Article extends Model
@@ -18,13 +19,17 @@ final class Article extends Model
         'title',
         'description',
         'content',
-        'author',
         'url',
         'image',
         'source',
         'category',
         'published_at',
     ];
+
+    public function authors(): BelongsToMany
+    {
+        return $this->belongsToMany(Author::class, 'article_authors')->withTimestamps();
+    }
 
     protected function casts(): array
     {

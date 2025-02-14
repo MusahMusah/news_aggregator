@@ -19,17 +19,15 @@ final class GetArticlesAction
     {
         $cacheKey = $this->generateCacheKey(Request::query());
 
-        $freshFor = 300; // 5 minutes
-        $staleFor = 600; // Additional 10 minutes
-
-        return Cache::flexible($cacheKey, [$freshFor, $staleFor], function () {
+        return Cache::flexible($cacheKey, [300, 600], function () {
             $query = QueryBuilder::for(Article::class)
                 ->allowedFilters([
                     AllowedFilter::partial('title'),
                     AllowedFilter::exact('source'),
-                    AllowedFilter::partial('author'),
+                    AllowedFilter::partial('authors.name'),
                     AllowedFilter::exact('published_at'),
                 ])
+                ->allowedIncludes('authors')
                 ->allowedSorts(['title', 'author', 'source', 'published_at']);
 
             $paginator = match (Request::has('cursor')) {
