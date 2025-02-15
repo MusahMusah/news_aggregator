@@ -30,7 +30,7 @@ final class FetchNewsCommand extends Command
     {
         $this->info('Fetching news...');
         $newsAggregator->fetchNews();
-        $this->info('News fetched successfully!');
+        $this->info('News fetched command execution has completed!');
 
         return 0;
     }
