@@ -25,10 +25,11 @@ final class GetArticlesAction
                     AllowedFilter::partial('title'),
                     AllowedFilter::exact('source'),
                     AllowedFilter::partial('authors.name'),
+                    AllowedFilter::partial('categories.name'),
                     AllowedFilter::exact('published_at'),
                 ])
-                ->allowedIncludes('authors')
-                ->allowedSorts(['title', 'authors.name', 'source', 'published_at']);
+                ->allowedIncludes('authors', 'categories')
+                ->allowedSorts(['title', 'authors.name', 'categories.name', 'source', 'published_at']);
 
             $paginator = match (Request::has('cursor')) {
                 true => $query->cursorPaginate(),

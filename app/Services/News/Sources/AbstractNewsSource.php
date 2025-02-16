@@ -6,6 +6,7 @@ namespace App\Services\News\Sources;
 
 use App\Interfaces\NewsSourceInterface;
 use App\Services\News\RetryPolicy;
+use Closure;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -39,6 +40,8 @@ abstract class AbstractNewsSource implements NewsSourceInterface
     }
 
     abstract public function getName(): string;
+
+    abstract public function mapCallBack(): Closure;
 
     public function getRateLimitKey(): string
     {

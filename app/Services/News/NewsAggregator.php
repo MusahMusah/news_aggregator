@@ -8,6 +8,7 @@ use App\DataTransferObjects\ArticleData;
 use App\Interfaces\NewsSourceInterface;
 use App\Models\Article;
 use App\Models\Author;
+use App\Models\Category;
 use App\Services\News\Observers\NewsObserverInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -62,6 +63,11 @@ final class NewsAggregator
                 $authors = collect($authorNames)->map(fn ($name) => Author::query()->firstOrCreate(['name' => $name]));
 
                 $article->authors()->sync($authors->pluck('id')->toArray());
+            }
+
+            if ($articleData->category) {
+                $category = Category::query()->firstOrCreate(['name' => $articleData->category]);
+                $article->categories()->sync($category->id);
             }
 
             return $article->load('authors');

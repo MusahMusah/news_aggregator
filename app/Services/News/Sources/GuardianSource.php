@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Services\News\Sources;
 
 use App\DataTransferObjects\ArticleData;
+use App\Traits\WithLazyCollection;
 use Carbon\CarbonImmutable;
+use Closure;
 use Illuminate\Support\Collection;
 
 final class GuardianSource extends AbstractNewsSource
 {
+    use WithLazyCollection;
+
     protected string $baseUrl = 'https://content.guardianapis.com/';
 
     public function fetchArticles(): Collection
@@ -19,7 +23,17 @@ final class GuardianSource extends AbstractNewsSource
             'show-fields' => 'all',
         ]);
 
-        return collect($data['response']['results'] ?? [])->map(fn ($article) => ArticleData::from([
+        return $this->useLazyCollection($data['response']['results'] ?? [], $this->mapCallBack());
+    }
+
+    public function getName(): string
+    {
+        return 'The Guardian';
+    }
+
+    public function mapCallBack(): Closure
+    {
+        return fn ($article) => ArticleData::from([
             'title' => $article['webTitle'],
             'description' => $article['fields']['trailText'] ?? null,
             'content' => $article['fields']['bodyText'] ?? null,
@@ -29,11 +43,6 @@ final class GuardianSource extends AbstractNewsSource
             'url' => $article['webUrl'],
             'image' => optional($article['fields'])['thumbnail'],
             'published_at' => CarbonImmutable::parse($article['webPublicationDate']),
-        ]));
-    }
-
-    public function getName(): string
-    {
-        return 'The Guardian';
+        ]);
     }
 }
