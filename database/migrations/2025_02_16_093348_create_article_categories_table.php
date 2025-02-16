@@ -12,15 +12,10 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('articles', function (Blueprint $table): void {
+        Schema::create('article_categories', function (Blueprint $table): void {
             $table->id();
-            $table->string('title')->index();
-            $table->string('source', 100);
-            $table->string('url')->unique();
-            $table->text('image')->nullable();
-            $table->longText('content')->nullable();
-            $table->longText('description')->nullable();
-            $table->dateTime('published_at');
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('article_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -30,6 +25,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('articles');
+        Schema::dropIfExists('article_categories');
     }
 };

@@ -26,6 +26,8 @@ final class ArticleData extends Data
         readonly public CarbonImmutable $published_at,
         #[DataCollectionOf(AuthorData::class)]
         public DataCollection|Lazy|null $authors,
+        #[DataCollectionOf(CategoryData::class)]
+        public DataCollection|Lazy|null $categories,
     ) {
     }
 
@@ -35,6 +37,7 @@ final class ArticleData extends Data
             ...$article->toArray(),
             'published_at' => CarbonImmutable::parse($article->published_at),
             'authors' => Lazy::whenLoaded('authors', $article, fn () => AuthorData::collect($article->authors)),
-        ])->exclude('author');
+            'categories' => Lazy::whenLoaded('categories', $article, fn () => CategoryData::collect($article->categories)),
+        ])->exclude('author', 'category');
     }
 }

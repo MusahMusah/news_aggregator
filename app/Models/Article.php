@@ -24,13 +24,17 @@ final class Article extends Model
         'url',
         'image',
         'source',
-        'category',
         'published_at',
     ];
 
     public function authors(): BelongsToMany
     {
         return $this->belongsToMany(Author::class, 'article_authors')->withTimestamps();
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'article_categories')->withTimestamps();
     }
 
     protected function casts(): array
