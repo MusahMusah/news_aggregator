@@ -229,7 +229,7 @@ test('handles empty response from news sources', function (): void {
 
     $observer = Mockery::mock(NewsObserverInterface::class);
     $observer->shouldReceive('onNewsUpdated')
-        ->once()
+        ->never()
         ->with(Mockery::on(fn ($articles) => $articles->isEmpty()));
 
     $this->newsAggregator

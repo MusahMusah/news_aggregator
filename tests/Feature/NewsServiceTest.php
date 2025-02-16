@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Services\News\NewsAggregator;
+use App\Services\News\Sources\GuardianSource;
 use App\Services\News\Sources\NewsApiSource;
 use App\Services\News\TestRetryPolicy;
 use Carbon\CarbonImmutable;
@@ -38,7 +39,6 @@ test('news:fetch command is scheduled to run hourly', function (): void {
 });
 
 test('command successfully fetches and stores news articles', function (): void {
-    // Arrange
     Http::fake([
         'newsapi.org/*' => Http::response([
             'articles' => [
@@ -70,12 +70,10 @@ test('command successfully fetches and stores news articles', function (): void 
     $newsAggregator = new NewsAggregator();
     $newsAggregator->addSource($newsApiSource);
 
-    // Act
     $result = Artisan::call('news:fetch');
 
-    // Assert
     expect($result)->toBe(0)
-        ->and(Http::recorded())->toHaveCount(1);
+        ->and(Http::recorded())->toHaveCount(2);
 
     $this->assertDatabaseHas('articles', [
         'title' => 'Test Article 1',
@@ -172,11 +170,12 @@ test('news source respects rate limits', function (): void {
 });
 
 test('news source implements retry policy for connection errors', function (): void {
-    $source = new NewsApiSource('test-key');
+    Config::set('news_sources.guardian.api_key', 'test-api-key');
+    $source = new GuardianSource('test-key');
 
     $attempts = 0;
     Http::fake([
-        'newsapi.org/*' => function () use (&$attempts) {
+        'content.guardianapis.com/*' => function () use (&$attempts) {
             $attempts++;
             if ($attempts < 3) {
                 throw new ConnectionException("Connection error");
@@ -186,10 +185,8 @@ test('news source implements retry policy for connection errors', function (): v
     ]);
 
     $source->fetchArticles();
-
     expect($attempts)->toBe(3);
 });
-
 
 test('news source rate limiter resets after time window', function (): void {
     config([
@@ -221,12 +218,12 @@ test('news source rate limiter resets after time window', function (): void {
 });
 
 test('news source handles missing rate limit config', function (): void {
-    config(['news_sources.NewsAPI.rate_limit' => null]);
+    config(['news_sources.guardian.rate_limit' => null]);
 
-    $source = new NewsApiSource('test-key');
+    $source = new GuardianSource('test-key');
 
     Http::fake([
-        'newsapi.org/*' => Http::response(['articles' => []]),
+        'content.guardianapis.com/*' => Http::response(['articles' => []]),
     ]);
 
     // Should be able to make multiple requests without rate limiting
